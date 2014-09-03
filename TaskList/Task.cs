@@ -25,5 +25,10 @@ namespace TaskList
             this._tId = id;
             this._content = content;
         }
+
+        public override string ToString()
+        {
+            return Content;
+        }
     }
 }

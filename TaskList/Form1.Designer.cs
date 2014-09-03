@@ -35,6 +35,7 @@
             this.btnDone = new System.Windows.Forms.Button();
             this.btnDoing = new System.Windows.Forms.Button();
             this.lblShow = new System.Windows.Forms.Label();
+            this.btnExit = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtContent
@@ -67,20 +68,23 @@
             // 
             this.cklShow.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.cklShow.FormattingEnabled = true;
+            this.cklShow.HorizontalScrollbar = true;
             this.cklShow.Location = new System.Drawing.Point(29, 57);
             this.cklShow.Name = "cklShow";
             this.cklShow.Size = new System.Drawing.Size(309, 148);
             this.cklShow.TabIndex = 3;
-            this.cklShow.SelectedIndexChanged += new System.EventHandler(this.cklShow_SelectedIndexChanged);
+            this.cklShow.TabStop = false;
+            this.cklShow.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.cklShow_ItemCheck);
             // 
             // btnDone
             // 
-            this.btnDone.Location = new System.Drawing.Point(240, 225);
+            this.btnDone.Location = new System.Drawing.Point(217, 225);
             this.btnDone.Name = "btnDone";
             this.btnDone.Size = new System.Drawing.Size(75, 23);
             this.btnDone.TabIndex = 4;
             this.btnDone.Text = "查看已完成";
             this.btnDone.UseVisualStyleBackColor = true;
+            this.btnDone.Click += new System.EventHandler(this.btnDone_Click);
             // 
             // btnDoing
             // 
@@ -89,23 +93,35 @@
             this.btnDoing.Size = new System.Drawing.Size(75, 23);
             this.btnDoing.TabIndex = 5;
             this.btnDoing.Text = "正在进行中的";
-            this.btnDoing.UseVisualStyleBackColor = true;
+            this.btnDoing.UseVisualStyleBackColor = false;
             this.btnDoing.Click += new System.EventHandler(this.btnDoing_Click);
             // 
             // lblShow
             // 
-            this.lblShow.AutoSize = true;
-            this.lblShow.Location = new System.Drawing.Point(108, 41);
+            this.lblShow.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lblShow.Location = new System.Drawing.Point(29, 36);
             this.lblShow.Name = "lblShow";
-            this.lblShow.Size = new System.Drawing.Size(32, 13);
+            this.lblShow.Size = new System.Drawing.Size(309, 18);
             this.lblShow.TabIndex = 6;
             this.lblShow.Text = "show";
+            this.lblShow.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btnExit
+            // 
+            this.btnExit.Location = new System.Drawing.Point(335, 239);
+            this.btnExit.Name = "btnExit";
+            this.btnExit.Size = new System.Drawing.Size(38, 25);
+            this.btnExit.TabIndex = 7;
+            this.btnExit.Text = "X";
+            this.btnExit.UseVisualStyleBackColor = true;
+            this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(392, 325);
+            this.ClientSize = new System.Drawing.Size(373, 265);
+            this.Controls.Add(this.btnExit);
             this.Controls.Add(this.lblShow);
             this.Controls.Add(this.btnDoing);
             this.Controls.Add(this.btnDone);
@@ -113,6 +129,8 @@
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtContent);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "待办事项";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -130,6 +148,7 @@
         private System.Windows.Forms.Button btnDone;
         private System.Windows.Forms.Button btnDoing;
         private System.Windows.Forms.Label lblShow;
+        private System.Windows.Forms.Button btnExit;
     }
 }
 
