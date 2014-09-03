@@ -61,6 +61,7 @@
             this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "添加";
             this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // cklShow
             // 
@@ -89,14 +90,16 @@
             this.btnDoing.TabIndex = 5;
             this.btnDoing.Text = "正在进行中的";
             this.btnDoing.UseVisualStyleBackColor = true;
+            this.btnDoing.Click += new System.EventHandler(this.btnDoing_Click);
             // 
             // lblShow
             // 
             this.lblShow.AutoSize = true;
-            this.lblShow.Location = new System.Drawing.Point(38, 274);
+            this.lblShow.Location = new System.Drawing.Point(108, 41);
             this.lblShow.Name = "lblShow";
-            this.lblShow.Size = new System.Drawing.Size(0, 13);
+            this.lblShow.Size = new System.Drawing.Size(32, 13);
             this.lblShow.TabIndex = 6;
+            this.lblShow.Text = "show";
             // 
             // Form1
             // 
