@@ -56,7 +56,7 @@ namespace TaskList
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            refreshCheckList(cklShow,0);
+            btnDoing_Click(this.btnDoing, e); 
         }
 
         // 更新指定列表的内容
@@ -65,7 +65,11 @@ namespace TaskList
             ckl.Items.Clear();
             try
             {
-                string sql = "select [taskId],[taskContent] from [TaskList] where [taskStatus] = " + status;
+                string sql = "";
+                if (status == 0)
+                    sql = "select [taskId],[taskContent] from [TaskList] where [taskStatus] = 0  ORDER BY [timeNew] ";
+                else
+                    sql = "select [taskId],[taskContent] from [TaskList] where [taskStatus] = 1  ORDER BY [timeDone] DESC ";
                 command.CommandText = sql;
                 conn.Open();
                 dataReader = command.ExecuteReader();
@@ -104,7 +108,9 @@ namespace TaskList
             if (addTask(content))
             {
                 lblShow.Text = "任务已添加";
-                refreshCheckList(cklShow,0);
+                refreshCheckList(cklShow, 0);               
+                btnDoing.BackColor = SystemColors.ActiveCaption;
+                btnDone.BackColor = SystemColors.Control;
             }
             else
                 lblShow.Text = "任务添加失败";
@@ -115,8 +121,10 @@ namespace TaskList
         // 把指定数据插入数据库
         private bool addTask(string content)
         {
-            string sql = "INSERT INTO [TaskList] ([taskContent], [taskStatus]) VALUES( N'"+ content +
-                "', 0)";
+            DateTime date = DateTime.Now;
+
+            string sql = "INSERT INTO [TaskList] ([taskContent], [taskStatus],[timeNew],[timeDone]) VALUES( N'" + content +
+                "', 0, N'" + date + "', N'" + date + "')";
             int count = 0;
             try
             {
@@ -187,15 +195,29 @@ namespace TaskList
         private bool updateTask(int taskId, int isFinish)  // 更新任务的状态
         {
             int count = 0;
+            DateTime date = DateTime.Now;
             try
             {
-                // isFinish 参数只能设置为0或者1 ，它表示任务的状态。
-                if (isFinish != 1 && isFinish != 0)
-                    throw new Exception("任务的状态设置出错");
-
-                string sql = "UPDATE [TaskList] " +
-                            "SET [taskStatus]= " + isFinish +
-                            "  WHERE [taskId] = " + taskId;
+                string sql = "";
+                switch (isFinish)
+                {
+                    case 1:
+                        sql = "UPDATE [TaskList] " +
+                                "SET [taskStatus]= 1 ," +
+                                " [timeDone] = N'" + date.ToString() +
+                                "'  WHERE [taskId] = " + taskId;
+                        break;
+                    case 0:
+                        sql = "UPDATE [TaskList] " +
+                                "SET [taskStatus]= 0 ," +
+                                " [timeNew] = N'" + date.ToString() +
+                                "'  WHERE [taskId] = " + taskId;
+                        break;
+                    default:
+                        // isFinish 参数只能设置为0或者1 ，它表示任务的状态。
+                        throw new Exception("任务的状态设置出错");                        
+                }
+                
                 command.CommandText = sql;
                 conn.Open();
                 count = command.ExecuteNonQuery();
