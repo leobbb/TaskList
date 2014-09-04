@@ -141,48 +141,61 @@ namespace TaskList
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            //Application.Exit();
+
+            // 测试- 删除类目的时候是否引发ItemChecked事件
+            //cklShow.Items.RemoveAt(cklShow.Items.Count - 1);
         }
 
-        private void cklShow_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            lblShow.Text = e.CurrentValue.ToString();
-            //if (e.CurrentValue == CheckState.Checked)
-            //    return;
-            try
-            {
-                lblShow.Text = "选中状态改变";
-                int index = e.Index;
-                Task task = cklShow.Items[index] as Task;
-                if (task != null)
-                {
-                    e.NewValue = CheckState.Unchecked;
-                    if (finishTask(task.TId))
-                    {
-                        lblShow.Text = string.Format("恭喜！任务 \"{0}\"已完成！", task.Content);
-                        //cklShow.Items.RemoveAt(index);
-                        refreshCheckList(cklShow, 0);
-                    }
-                    else
-                        lblShow.Text = "操作失败，没有改变任务状态";
-                }
-                else
-                    lblShow.Text = "没有选中任务";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "删除出错", MessageBoxButtons.OK);
-            }
-        }
+        //private void cklShow_ItemCheck(object sender, ItemCheckEventArgs e)
+        //{
 
-        private bool finishTask(int p)
+        //    if (e.CurrentValue == CheckState.Checked)
+        //        return;
+        //    lblShow.Text = e.CurrentValue.ToString();
+        //    e.NewValue = CheckState.Unchecked;
+        //    // 清除所有选择状态
+        //    cklShow.ClearSelected();
+        //    cklShow.Items.RemoveAt(e.Index);
+        //    try
+        //    {
+        //        lblShow.Text = "选中状态改变";
+        //        int index = e.Index;
+        //        Task task = cklShow.Items[index] as Task;
+        //        if (task != null)
+        //        {
+        //            e.NewValue = CheckState.Unchecked;
+        //            if (finishTask(task.TId))
+        //            {
+        //                lblShow.Text = string.Format("恭喜！任务 \"{0}\"已完成！", task.Content);
+        //                //cklShow.Items.RemoveAt(index);
+        //                refreshCheckList(cklShow, 0);
+        //            }
+        //            else
+        //                lblShow.Text = "操作失败，没有改变任务状态";
+        //        }
+        //        else
+        //            lblShow.Text = "没有选中任务";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message, "删除出错", MessageBoxButtons.OK);
+        //    }
+        //}
+
+        
+        private bool updateTask(int taskId, int isFinish)  // 更新任务的状态
         {
-            string sql = "UPDATE [TaskList] " +
-                        "SET [taskStatus]= 1 " +
-                        "WHERE [taskId] = " + p;
             int count = 0;
             try
             {
+                // isFinish 参数只能设置为0或者1 ，它表示任务的状态。
+                if (isFinish != 1 && isFinish != 0)
+                    throw new Exception("任务的状态设置出错");
+
+                string sql = "UPDATE [TaskList] " +
+                            "SET [taskStatus]= " + isFinish +
+                            "  WHERE [taskId] = " + taskId;
                 command.CommandText = sql;
                 conn.Open();
                 count = command.ExecuteNonQuery();
@@ -201,6 +214,7 @@ namespace TaskList
             else
                 return false;
         }
+
         private void btnDoing_Click(object sender, EventArgs e)
         {
             refreshCheckList(cklShow, 0);
@@ -215,6 +229,46 @@ namespace TaskList
             lblShow.Text = "已完成的任务列表刷新成功";
             btnDone.BackColor = SystemColors.ActiveCaption;
             btnDoing.BackColor = SystemColors.Control;
+        }
+
+        private void cklShow_DoubleClick(object sender, EventArgs e)
+        {
+            Task task = cklShow.SelectedItem as Task;
+            try
+            {
+                if (task != null)
+                {
+                    // 如果btnDoing按键被激活，则双击事件完成“把任务标记为已完成”的任务。
+                    if (btnDoing.BackColor == SystemColors.ActiveCaption)
+                    {                        
+                        if (updateTask(task.TId,1))
+                        {
+                            lblShow.Text = string.Format("恭喜！任务 \"{0}\"已完成！", task.Content);
+                            cklShow.Items.Remove(task);
+                            //refreshCheckList(cklShow, 0);
+                        }
+                        else
+                            lblShow.Text = "操作失败，没有改变任务状态";
+                    }
+                    else // 如果btnDone按键被激活，则双击事件完成“把任务标记为进行中”的任务。
+                    {
+                        if (updateTask(task.TId, 0))
+                        {
+                            lblShow.Text = string.Format("任务 \"{0}\" 重新开始！",task.Content);
+                            cklShow.Items.Remove(task);
+                        }
+                        else
+                            lblShow.Text = "操作失败，没有改变任务状态";
+                    }
+                    
+                }
+                else
+                    lblShow.Text = "没有选中任务";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "删除出错", MessageBoxButtons.OK);
+            }
         }
 
     }

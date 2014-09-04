@@ -36,6 +36,7 @@
             this.btnDoing = new System.Windows.Forms.Button();
             this.lblShow = new System.Windows.Forms.Label();
             this.btnExit = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // txtContent
@@ -59,29 +60,29 @@
             this.btnAdd.Location = new System.Drawing.Point(263, 10);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
-            this.btnAdd.TabIndex = 2;
+            this.btnAdd.TabIndex = 1;
             this.btnAdd.Text = "添加";
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
             // cklShow
             // 
-            this.cklShow.Font = new System.Drawing.Font("Microsoft Sans Serif", 14F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.cklShow.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.cklShow.FormattingEnabled = true;
             this.cklShow.HorizontalScrollbar = true;
             this.cklShow.Location = new System.Drawing.Point(29, 57);
             this.cklShow.Name = "cklShow";
-            this.cklShow.Size = new System.Drawing.Size(309, 148);
+            this.cklShow.Size = new System.Drawing.Size(309, 130);
             this.cklShow.TabIndex = 3;
             this.cklShow.TabStop = false;
-            this.cklShow.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.cklShow_ItemCheck);
+            this.cklShow.DoubleClick += new System.EventHandler(this.cklShow_DoubleClick);
             // 
             // btnDone
             // 
             this.btnDone.Location = new System.Drawing.Point(217, 225);
             this.btnDone.Name = "btnDone";
             this.btnDone.Size = new System.Drawing.Size(75, 23);
-            this.btnDone.TabIndex = 4;
+            this.btnDone.TabIndex = 3;
             this.btnDone.Text = "查看已完成";
             this.btnDone.UseVisualStyleBackColor = true;
             this.btnDone.Click += new System.EventHandler(this.btnDone_Click);
@@ -91,7 +92,7 @@
             this.btnDoing.Location = new System.Drawing.Point(50, 225);
             this.btnDoing.Name = "btnDoing";
             this.btnDoing.Size = new System.Drawing.Size(75, 23);
-            this.btnDoing.TabIndex = 5;
+            this.btnDoing.TabIndex = 2;
             this.btnDoing.Text = "正在进行中的";
             this.btnDoing.UseVisualStyleBackColor = false;
             this.btnDoing.Click += new System.EventHandler(this.btnDoing_Click);
@@ -112,15 +113,28 @@
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(38, 25);
             this.btnExit.TabIndex = 7;
+            this.btnExit.TabStop = false;
             this.btnExit.Text = "X";
             this.btnExit.UseVisualStyleBackColor = true;
             this.btnExit.Click += new System.EventHandler(this.btnExit_Click);
             // 
+            // label2
+            // 
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label2.Location = new System.Drawing.Point(29, 190);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(309, 23);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "双击任务可以改变任务的状态";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // Form1
             // 
+            this.AcceptButton = this.btnAdd;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(373, 265);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.btnExit);
             this.Controls.Add(this.lblShow);
             this.Controls.Add(this.btnDoing);
@@ -149,6 +163,7 @@
         private System.Windows.Forms.Button btnDoing;
         private System.Windows.Forms.Label lblShow;
         private System.Windows.Forms.Button btnExit;
+        private System.Windows.Forms.Label label2;
     }
 }
 
