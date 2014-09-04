@@ -1,0 +1,3 @@
+﻿ALTER TABLE [TaskList]
+ALTER COLUMN [TaskContent] NVARCHAR(40) 
+GO 
