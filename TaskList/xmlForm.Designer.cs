@@ -36,12 +36,13 @@
             this.btnAdd = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtContent = new System.Windows.Forms.TextBox();
+            this.lblAmount = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lbl2
             // 
             this.lbl2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.lbl2.Location = new System.Drawing.Point(40, 207);
+            this.lbl2.Location = new System.Drawing.Point(37, 222);
             this.lbl2.Name = "lbl2";
             this.lbl2.Size = new System.Drawing.Size(309, 23);
             this.lbl2.TabIndex = 16;
@@ -61,20 +62,20 @@
             // btnDoing
             // 
             this.btnDoing.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.btnDoing.Location = new System.Drawing.Point(61, 242);
+            this.btnDoing.Location = new System.Drawing.Point(60, 248);
             this.btnDoing.Name = "btnDoing";
             this.btnDoing.Size = new System.Drawing.Size(75, 23);
-            this.btnDoing.TabIndex = 12;
+            this.btnDoing.TabIndex = 4;
             this.btnDoing.Text = "正在进行中的";
             this.btnDoing.UseVisualStyleBackColor = false;
             this.btnDoing.Click += new System.EventHandler(this.btnDoing_Click);
             // 
             // btnDone
             // 
-            this.btnDone.Location = new System.Drawing.Point(228, 242);
+            this.btnDone.Location = new System.Drawing.Point(229, 248);
             this.btnDone.Name = "btnDone";
             this.btnDone.Size = new System.Drawing.Size(75, 23);
-            this.btnDone.TabIndex = 13;
+            this.btnDone.TabIndex = 5;
             this.btnDone.Text = "查看已完成";
             this.btnDone.UseVisualStyleBackColor = true;
             this.btnDone.Click += new System.EventHandler(this.btnDone_Click);
@@ -87,8 +88,7 @@
             this.cklShow.Location = new System.Drawing.Point(40, 74);
             this.cklShow.Name = "cklShow";
             this.cklShow.Size = new System.Drawing.Size(309, 130);
-            this.cklShow.TabIndex = 14;
-            this.cklShow.TabStop = false;
+            this.cklShow.TabIndex = 3;
             this.cklShow.DoubleClick += new System.EventHandler(this.cklShow_DoubleClick);
             // 
             // btnAdd
@@ -96,7 +96,7 @@
             this.btnAdd.Location = new System.Drawing.Point(274, 27);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
-            this.btnAdd.TabIndex = 10;
+            this.btnAdd.TabIndex = 2;
             this.btnAdd.Text = "添加";
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
@@ -115,13 +115,23 @@
             this.txtContent.Location = new System.Drawing.Point(122, 29);
             this.txtContent.Name = "txtContent";
             this.txtContent.Size = new System.Drawing.Size(135, 20);
-            this.txtContent.TabIndex = 9;
+            this.txtContent.TabIndex = 1;
+            // 
+            // lblAmount
+            // 
+            this.lblAmount.AutoSize = true;
+            this.lblAmount.Location = new System.Drawing.Point(40, 207);
+            this.lblAmount.Name = "lblAmount";
+            this.lblAmount.Size = new System.Drawing.Size(0, 13);
+            this.lblAmount.TabIndex = 17;
             // 
             // xmlForm
             // 
+            this.AcceptButton = this.btnAdd;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(385, 283);
+            this.Controls.Add(this.lblAmount);
             this.Controls.Add(this.lbl2);
             this.Controls.Add(this.lblShow);
             this.Controls.Add(this.btnDoing);
@@ -131,8 +141,9 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtContent);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "xmlForm";
-            this.Text = "xmlForm";
+            this.Text = "Todo列表";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.xmlForm_FormClosing);
             this.Load += new System.EventHandler(this.xmlForm_Load);
             this.ResumeLayout(false);
@@ -140,6 +151,10 @@
 
         }
 
+        private System.Windows.Forms.DialogResult callMe()
+        {
+            return  System.Windows.Forms.MessageBox.Show("您好，我就是作者。\n联系我：yanzhenxing.com\nhttps://github.com/leobbb\n\n你确定要添加此任务？", "Hello", System.Windows.Forms.MessageBoxButtons.OKCancel);            
+        }
         #endregion
 
         private System.Windows.Forms.Label lbl2;
@@ -150,5 +165,6 @@
         private System.Windows.Forms.Button btnAdd;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtContent;
+        private System.Windows.Forms.Label lblAmount;
     }
 }

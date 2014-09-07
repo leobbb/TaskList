@@ -50,7 +50,7 @@ namespace TaskList
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"程序加载时出现错误");
+                MessageBox.Show(ex.Message,"程序加载时出现错误\n请重新打开");
             }       
         }
 
@@ -65,6 +65,9 @@ namespace TaskList
         // 创建新的 XML 文档，只包含声明和一个根节点
         private void createNewXmlFile()
         {
+            if (!System.IO.Directory.Exists("./Data"))
+                System.IO.Directory.CreateDirectory("./Data");
+
             xDoc = new XmlDocument();
             XmlDeclaration declare = xDoc.CreateXmlDeclaration("1.0", "utf-8", "yes");
             xDoc.AppendChild(declare);
@@ -73,7 +76,7 @@ namespace TaskList
 
             XmlAttribute attr = xDoc.CreateAttribute("count"); // 创建根节点的属性 count
             attr.Value = "0";       // 设置 count 的值为 “0”。
-            root.AppendChild(attr);  // 把属性节点 (count)，添加到根节点 (TaskList)
+            root.Attributes.Append(attr);  // 把属性节点 (count)，添加到根节点 (TaskList)
 
             xDoc.AppendChild(root);     // 把根节点添加到文档中
             xDoc.Save(path);
@@ -81,8 +84,27 @@ namespace TaskList
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            string content = txtContent.Text;
+            string content = txtContent.Text.Trim();
+            
+            if (content == string.Empty)
+            {
+                MessageBox.Show("任务内容不能为空\n请重新输入", "输入错误", MessageBoxButtons.OK);
+                txtContent.Focus();
+                return;
+            }
+
             DateTime time = DateTime.Now;
+            
+            // 隐藏彩蛋
+            if ( content == "leo")
+            {
+                if (callMe() == DialogResult.Cancel)
+                {
+                    txtContent.Text = "";
+                    txtContent.Focus();
+                    return;
+                }
+            }
 
             // 创建 task 对象，任务的总数增加 1 
             Task task = new Task(++count, content, "doing", time, time);
@@ -91,10 +113,16 @@ namespace TaskList
             {
                 btnDoing_Click(sender, e);
                 lblShow.Text = "任务添加成功";
+                txtContent.Text = "";
+                txtContent.Focus();
             }
             else
+            {
                 lblShow.Text = "任务添加失败";
-
+                
+                // 进行错误处理
+                errorHandling(1);
+            }
         }
 
         // 向 XML 文档添加一个新的任务
@@ -104,14 +132,6 @@ namespace TaskList
             {
                 //xDoc.Load(path);      // 加载xml文件
                 root = xDoc.DocumentElement;        // 获取xml文件的根元素
-
-                // 简单的判断根元素的名称
-                if (root.Name != "TaskList")
-                {
-                    createNewXmlFile();
-                    this.Refresh();
-                    lblShow.Text = "数据文件出现错误，已建立新文件。";
-                }
 
                 // 创建 Task 节点
                 XmlElement tElem = xDoc.CreateElement("Task");
@@ -158,12 +178,41 @@ namespace TaskList
             }
         }
 
+        // 错误处理的方法
+        private void errorHandling(int e)
+        {
+            DialogResult dres;
+            switch (e)
+            {
+                case 1:     // 添加新节点出错，或者刷新出错        
+                    dres = MessageBox.Show("数据文件无法使用，可能存在错误。\n是否删除所有数据，建立新文件？", "数据文件损坏", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    if (dres == System.Windows.Forms.DialogResult.OK)
+                    {
+                        createNewXmlFile();
+                        lblShow.Text += "  数据文件已重新建立";
+                    }
+                    else
+                    {
+                        lblShow.Text += "  请手动检查数据文件";
+                    }
+                    break;               
+            }   
+        }
+
         private void btnDoing_Click(object sender, EventArgs e)
         {
+            
             btnDoing.BackColor = SystemColors.ActiveCaption;
             btnDone.BackColor = SystemColors.Control;
             if (refreshList("doing"))
                 lblShow.Text = "正在进行中的任务已刷新";
+            else
+            {
+                lblShow.Text = "刷新失败";
+                
+                // 进行错误处理
+                errorHandling(1);
+            }
         }
 
         // 刷新列表，根据 p 的值选择显示 doing 的任务，还是 done 的任务。
@@ -215,13 +264,18 @@ namespace TaskList
 
                 //IList<Task> tList = sList.Values;
                 //IEnumerable<Task> iEnu = tList.Reverse();
-
+                
                 IEnumerator<KeyValuePair<DateTime,Task>> iEnu;
                 if (status == "done")
+                {
                     iEnu = sList.Reverse().GetEnumerator();   // 完成的任务的顺序是 最后完成的排在前边
+                    lblAmount.Text = "已完成的任务共 " + sList.Count + " 个";
+                }
                 else
+                {
                     iEnu = sList.GetEnumerator();             // 进行中的任务的顺序是 最后添加的排在后边
-                
+                    lblAmount.Text = "进行中的任务共 " + sList.Count + " 个";
+                }
                 // 将 sList 中的对象添加到 cklShow 控件中
                 //foreach (Task t in sList.Values)
                 //foreach (Task t in sList.Values)
@@ -238,7 +292,7 @@ namespace TaskList
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "刷新出错");
+                MessageBox.Show(ex.Message, "刷新失败");
                 return false;
             }
         }
@@ -249,7 +303,13 @@ namespace TaskList
             btnDoing.BackColor = SystemColors.Control;
             if (refreshList("done"))
                 lblShow.Text = "完成的任务已刷新";
+            else
+            {
+                lblShow.Text = "刷新失败";
 
+                // 进行错误处理
+                errorHandling(1);
+            }
         }
 
         private void cklShow_DoubleClick(object sender, EventArgs e)
@@ -286,7 +346,7 @@ namespace TaskList
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "删除出错", MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, "更新失败\n请检查数据文件", MessageBoxButtons.OK);
             }
         }
 
@@ -319,8 +379,28 @@ namespace TaskList
 
         private void xmlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // 窗体关闭之前，保存文件。
-            xDoc.Save(path);
+            try
+            {
+                // 窗体关闭之前，保存文件。
+                xDoc.Save(path);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "保存文件出错");
+                
+                DialogResult dres = MessageBox.Show("是否继续关闭窗口？\n并将数据保存到“failure.txt”中？", "即将关闭", MessageBoxButtons.OKCancel);
+                if (dres == System.Windows.Forms.DialogResult.OK)
+                {
+                    System.IO.StreamWriter sw = new System.IO.StreamWriter("failure.txt", true);
+                    sw.Write(xDoc.OuterXml);
+                    sw.Close();
+                }
+                else
+                {
+                    lblShow.Text = "不能正常关闭程序，请检查数据文件。";
+                    e.Cancel = true;
+                }
+            }
         }
 
     }
