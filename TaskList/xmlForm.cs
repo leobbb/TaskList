@@ -1,11 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
@@ -23,8 +20,9 @@ namespace TaskList
 
         XmlDocument xDoc;
         XmlElement root;
-        
-        private static string path = "./Data/TaskList.xml";
+        XPathNavigator nav;
+        private static string path = "./Data/TaskList.xml";     // 文档默认的保存路径
+        private static int count = 0;       // 任务列表中的任务个数
 
         private void xmlForm_Load(object sender, EventArgs e)
         {
@@ -39,27 +37,45 @@ namespace TaskList
                 if (!System.IO.File.Exists(path))
                     createNewXmlFile();
 
-                lblShow.Text = "文件已经创建";
+                //lblShow.Text = "文件已经创建";
 
+                // 把 XML 文档加载到内存
                 xDoc.Load(path);
 
+                // 查询 XML 文档中任务的总数
+                count = getTaskAmount();
+
+                // 初始化列表内容
                 btnDoing_Click(sender, e);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"文件夹创建出错");
-            }
-            
-
+                MessageBox.Show(ex.Message,"程序加载时出现错误");
+            }       
         }
 
+        private int getTaskAmount()
+        {
+            nav = xDoc.CreateNavigator();       // 创建文档浏览器
+            nav.MoveToChild("TaskList", "");    // 移到到根节点
+            count = int.Parse(nav.GetAttribute("count", ""));    // 获得根节点里的 count 属性值            
+            return count;
+        }
+
+        // 创建新的 XML 文档，只包含声明和一个根节点
         private void createNewXmlFile()
         {
             xDoc = new XmlDocument();
             XmlDeclaration declare = xDoc.CreateXmlDeclaration("1.0", "utf-8", "yes");
             xDoc.AppendChild(declare);
-            root = xDoc.CreateElement("TaskList");
-            xDoc.AppendChild(root);
+
+            root = xDoc.CreateElement("TaskList");      // 创建根节点 TaskList
+
+            XmlAttribute attr = xDoc.CreateAttribute("count"); // 创建根节点的属性 count
+            attr.Value = "0";       // 设置 count 的值为 “0”。
+            root.AppendChild(attr);  // 把属性节点 (count)，添加到根节点 (TaskList)
+
+            xDoc.AppendChild(root);     // 把根节点添加到文档中
             xDoc.Save(path);
         }
 
@@ -67,18 +83,21 @@ namespace TaskList
         {
             string content = txtContent.Text;
             DateTime time = DateTime.Now;
-            Task task = new Task(content, "doing", time, time);
+
+            // 创建 task 对象，任务的总数增加 1 
+            Task task = new Task(++count, content, "doing", time, time);
 
             if (addXmlElement(task))
             {
+                btnDoing_Click(sender, e);
                 lblShow.Text = "任务添加成功";
-                cklShow.Items.Add(task);
             }
             else
                 lblShow.Text = "任务添加失败";
 
         }
 
+        // 向 XML 文档添加一个新的任务
         private bool addXmlElement(Task task)
         {
             try
@@ -90,11 +109,16 @@ namespace TaskList
                 if (root.Name != "TaskList")
                 {
                     createNewXmlFile();
+                    this.Refresh();
                     lblShow.Text = "数据文件出现错误，已建立新文件。";
                 }
 
                 // 创建 Task 节点
                 XmlElement tElem = xDoc.CreateElement("Task");
+                // 创建属性节点 id，并添加到 Task 中。
+                XmlAttribute attr = xDoc.CreateAttribute("id");
+                attr.Value = task.TId.ToString();
+                tElem.SetAttributeNode(attr);
 
                 // 创建 TaskContent 节点，并添加到 Task 中
                 XmlElement elem = xDoc.CreateElement("TaskContent");
@@ -123,6 +147,7 @@ namespace TaskList
                 // 把 Task 节点添加到 TaskList 根节点
                 root.AppendChild(tElem);
 
+                root.SetAttribute("count", count.ToString());
                 xDoc.Save(path);
                 return true;
             }
@@ -147,19 +172,68 @@ namespace TaskList
             cklShow.Items.Clear();
             try
             {
+                // 创建一个存放任务对象的集合，用于排序
+                //List<Task> tList = new List<Task>();    
+                SortedList<DateTime, Task> sList = new SortedList<DateTime, Task>();
+                Task task;
+
                 //XPathDocument xpDoc = new XPathDocument(path);      // 创建 XPath 文档
-                XPathNavigator nav = xDoc.CreateNavigator();       // 创建文档浏览器
+                nav = xDoc.CreateNavigator();       // 创建文档浏览器
                 string comm = string.Format("TaskList/Task[TaskStatus=\"{0}\"]", status);  // 命令字符串
                 XPathExpression exp = nav.Compile(comm);        //  封装命令
                 XPathNodeIterator ni = nav.Select(exp);         // 执行命令，返回一个迭代器
                 while (ni.MoveNext()) 
                 {
+                    nav = ni.Current;    // nav 指向当前的 Task 节点
+
+                    int id = int.Parse(nav.GetAttribute("id", "")); // 获得任务的 id
+                    
+                    // 获得任务的内容 content
                     XPathNodeIterator sni = ni.Current.SelectChildren("TaskContent", "");
                     sni.MoveNext();
                     string content = sni.Current.Value;
 
-                    cklShow.Items.Add(content);
+                    // 获得任务的添加时间
+                    sni = nav.SelectChildren("TimeNew", "");
+                    sni.MoveNext();
+                    DateTime timeNew = DateTime.Parse(sni.Current.Value);
+
+                    // 获取任务的完成时间
+                    sni = nav.SelectChildren("TimeDone", "");
+                    sni.MoveNext();
+                    DateTime timeDone = DateTime.Parse(sni.Current.Value);
+
+                    task = new Task(id, content, status, timeNew, timeDone);
+                    // 把任务添加到集合 tList
+                    //tList.Add(new Task(id, content, status, timeNew, timeDone));    
+
+                    if (status == "doing")
+                        sList.Add(task.TimeNew, task);  // 进行中的任务，按照添加的时间进行排序
+                    else
+                        sList.Add(task.TimeDone, task); // 已完成的任务，按照完成的时间进行排序
                 }
+
+                //IList<Task> tList = sList.Values;
+                //IEnumerable<Task> iEnu = tList.Reverse();
+
+                IEnumerator<KeyValuePair<DateTime,Task>> iEnu;
+                if (status == "done")
+                    iEnu = sList.Reverse().GetEnumerator();   // 完成的任务的顺序是 最后完成的排在前边
+                else
+                    iEnu = sList.GetEnumerator();             // 进行中的任务的顺序是 最后添加的排在后边
+                
+                // 将 sList 中的对象添加到 cklShow 控件中
+                //foreach (Task t in sList.Values)
+                //foreach (Task t in sList.Values)
+                //{
+                //    cklShow.Items.Add(t);
+                //}
+
+                while(iEnu.MoveNext())
+                {
+                    cklShow.Items.Add(iEnu.Current.Value);
+                }
+                
                 return true;
             }
             catch (Exception ex)
@@ -180,7 +254,7 @@ namespace TaskList
 
         private void cklShow_DoubleClick(object sender, EventArgs e)
         {
-            string task = cklShow.SelectedItem.ToString();
+            Task task = cklShow.SelectedItem as Task;
             try
             {
                 if (task != null)
@@ -188,9 +262,9 @@ namespace TaskList
                     // 如果btnDoing按键被激活，则双击事件完成“把任务标记为已完成”的任务。
                     if (btnDoing.BackColor == SystemColors.ActiveCaption)
                     {
-                        if(updateTask(task,"done"))
+                        if(updateTask(task.TId,"done"))
                         {
-                            lblShow.Text = string.Format("恭喜！任务 \"{0}\"已完成！", task);
+                            lblShow.Text = string.Format("恭喜！任务 \"{0}\"已完成！", task.ToString());
                             cklShow.Items.Remove(task);
                         }
                         else
@@ -198,9 +272,9 @@ namespace TaskList
                     }
                     else // 如果btnDone按键被激活，则双击事件完成“把任务标记为进行中”的任务。
                     {
-                        if (updateTask(task,"doing" ))
+                        if (updateTask(task.TId,"doing" ))
                         {
-                            lblShow.Text = string.Format("任务 \"{0}\" 重新开始！", task);
+                            lblShow.Text = string.Format("任务 \"{0}\" 重新开始！", task.ToString());
                             cklShow.Items.Remove(task);
                         }
                         else
@@ -216,19 +290,36 @@ namespace TaskList
             }
         }
 
-        private bool updateTask(string content, string status)
+        private bool updateTask(int id, string status)
         {
             XPathNavigator nav = xDoc.CreateNavigator();       // 创建文档浏览器
-            string comm = string.Format("TaskList/Task[TaskContent=\"{0}\"]", content);  // 命令字符串
+            string comm = string.Format("TaskList/Task[@id=\"{0}\"]", id);  // 命令字符串
             
-            XPathNavigator ni = nav.SelectSingleNode(comm);         // 执行命令，返回一个迭代器
-            ni.MoveToChild("TaskStatus", "");
-            ni.SetValue(status);
+            nav = nav.SelectSingleNode(comm);         // 执行命令,返回一个 Task 节点
+            
+            // 修改任务的状态
+            nav.MoveToChild("TaskStatus", "");
+            nav.SetValue(status);
+            nav.MoveToParent();
+
+            // 修改对应的时间信息
+            if (status == "done")
+            {
+                nav.MoveToChild("TimeDone", "");
+                nav.SetValue(DateTime.Now.ToString());
+            }
+            else
+            {
+                nav.MoveToChild("TimeNew", "");
+                nav.SetValue(DateTime.Now.ToString());
+            }
+
             return true;
         }
 
         private void xmlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // 窗体关闭之前，保存文件。
             xDoc.Save(path);
         }
 

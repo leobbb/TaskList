@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.label2 = new System.Windows.Forms.Label();
+            this.lbl2 = new System.Windows.Forms.Label();
             this.lblShow = new System.Windows.Forms.Label();
             this.btnDoing = new System.Windows.Forms.Button();
             this.btnDone = new System.Windows.Forms.Button();
@@ -38,15 +38,15 @@
             this.txtContent = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
-            // label2
+            // lbl2
             // 
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(40, 207);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(309, 23);
-            this.label2.TabIndex = 16;
-            this.label2.Text = "双击任务可以改变任务的状态";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lbl2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.lbl2.Location = new System.Drawing.Point(40, 207);
+            this.lbl2.Name = "lbl2";
+            this.lbl2.Size = new System.Drawing.Size(309, 23);
+            this.lbl2.TabIndex = 16;
+            this.lbl2.Text = "双击任务可以改变任务的状态";
+            this.lbl2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // lblShow
             // 
@@ -122,7 +122,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(385, 283);
-            this.Controls.Add(this.label2);
+            this.Controls.Add(this.lbl2);
             this.Controls.Add(this.lblShow);
             this.Controls.Add(this.btnDoing);
             this.Controls.Add(this.btnDone);
@@ -142,7 +142,7 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lbl2;
         private System.Windows.Forms.Label lblShow;
         private System.Windows.Forms.Button btnDoing;
         private System.Windows.Forms.Button btnDone;
