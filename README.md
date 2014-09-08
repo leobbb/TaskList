@@ -8,6 +8,9 @@
 	3. 标记已完成
 	4. 查看待办事项历史
 
+> 使用的开发环境为 Visual Studio 2013
+
+> 依赖： .NET 4.5， XML 1.0.
 
 ## 源码有三个分支(branches)：master.using-sql, using-XML.##
 * master: 初始的分支，内容等于using-XML分支。
