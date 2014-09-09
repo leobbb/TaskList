@@ -35,8 +35,8 @@ namespace TaskListTest
             bool actual2 = (bool)privateObject.Invoke("refreshList", str2);
 
             // Assert 
-            Assert.IsTrue(actual1);
-            Assert.IsTrue(actual2);
+            Assert.IsTrue(actual1, "done's wrong");
+            Assert.IsTrue(actual2, "doing's wrong");
         }
 
         [TestMethod]

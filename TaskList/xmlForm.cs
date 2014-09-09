@@ -223,8 +223,8 @@ namespace TaskList
             try
             {
                 // 创建一个存放任务对象的集合，用于排序
-                //List<Task> tList = new List<Task>();    
-                SortedList<DateTime, Task> sList = new SortedList<DateTime, Task>();
+                List<Task> tList = new List<Task>();    
+                //SortedList<DateTime, Task> sList = new SortedList<DateTime, Task>();
                 Task task;
 
                 //XPathDocument xpDoc = new XPathDocument(path);      // 创建 XPath 文档
@@ -255,39 +255,51 @@ namespace TaskList
 
                     task = new Task(id, content, status, timeNew, timeDone);
                     // 把任务添加到集合 tList
-                    //tList.Add(new Task(id, content, status, timeNew, timeDone));    
+                    tList.Add(new Task(id, content, status, timeNew, timeDone));    
 
-                    if (status == "doing")
-                        sList.Add(task.TimeNew, task);  // 进行中的任务，按照添加的时间进行排序
-                    else
-                        sList.Add(task.TimeDone, task); // 已完成的任务，按照完成的时间进行排序
+                    //if (status == "doing")
+                    //    sList.Add(task.TimeNew, task);  // 进行中的任务，按照添加的时间进行排序
+                    //else
+                    //    sList.Add(task.TimeDone, task); // 已完成的任务，按照完成的时间进行排序
                 }
 
                 //IList<Task> tList = sList.Values;
                 //IEnumerable<Task> iEnu = tList.Reverse();
                 
-                IEnumerator<KeyValuePair<DateTime,Task>> iEnu;
-                if (status == "done")
-                {
-                    iEnu = sList.Reverse().GetEnumerator();   // 完成的任务的顺序是 最后完成的排在前边
-                    lblAmount.Text = "已完成的任务共 " + sList.Count + " 个";
-                }
-                else
-                {
-                    iEnu = sList.GetEnumerator();             // 进行中的任务的顺序是 最后添加的排在后边
-                    lblAmount.Text = "进行中的任务共 " + sList.Count + " 个";
-                }
-                // 将 sList 中的对象添加到 cklShow 控件中
-                //foreach (Task t in sList.Values)
-                //foreach (Task t in sList.Values)
+                //IEnumerator<KeyValuePair<DateTime,Task>> iEnu;
+                //if (status == "done")
                 //{
-                //    cklShow.Items.Add(t);
+                //    iEnu = sList.Reverse().GetEnumerator();   // 完成的任务的顺序是 最后完成的排在前边
+                //    lblAmount.Text = "已完成的任务共 " + sList.Count + " 个";
+                //}
+                //else
+                //{
+                //    iEnu = sList.GetEnumerator();             // 进行中的任务的顺序是 最后添加的排在后边
+                //    lblAmount.Text = "进行中的任务共 " + sList.Count + " 个";
                 //}
 
-                while(iEnu.MoveNext())
+
+                // 通过 List 的 Sort( IComparer<> ) 方法进行排序
+                switch (status)
                 {
-                    cklShow.Items.Add(iEnu.Current.Value);
+                    case "done":        // 完成的任务的顺序是 最后完成的排在前边( 按完成时间倒序）
+                        tList.Sort(new Task(Task.SortField.TimeDone, SortDirection.Descending));
+                        break;
+                    case "doing":       // 进行中的任务的顺序是 最后添加的排在后边（按开始时间顺序）
+                        tList.Sort(new Task(Task.SortField.TimeNew, SortDirection.Ascending));
+                        break;
                 }
+               
+                // 将 List 中的对象添加到 cklShow 控件中
+                foreach (Task t in tList)
+                {
+                    cklShow.Items.Add(t);
+                }
+
+                //while(iEnu.MoveNext())
+                //{
+                //    cklShow.Items.Add(iEnu.Current.Value);
+                //}
                 
                 return true;
             }
