@@ -283,10 +283,10 @@ namespace TaskList
                 switch (status)
                 {
                     case "done":        // 完成的任务的顺序是 最后完成的排在前边( 按完成时间倒序）
-                        tList.Sort(new Task(Task.SortField.TimeDone, SortDirection.Descending));
+                        tList.Sort(new Task.TaskComparer(Task.SortField.TimeDone, SortDirection.Descending));
                         break;
                     case "doing":       // 进行中的任务的顺序是 最后添加的排在后边（按开始时间顺序）
-                        tList.Sort(new Task(Task.SortField.TimeNew, SortDirection.Ascending));
+                        tList.Sort(new Task.TaskComparer(Task.SortField.TimeNew, SortDirection.Ascending));
                         break;
                 }
                

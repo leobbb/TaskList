@@ -14,7 +14,7 @@ namespace TaskList
         Descending = 1
     }
 
-    class Task : IComparer<Task>
+    class Task 
     {
         private int _tId;           // 任务的编号
         private string _content;    // 任务的内容
@@ -67,36 +67,37 @@ namespace TaskList
         }
 
         // 按照日期从小到大排序
-        public int CompareTo(object obj)
-        {
-            Task t = (Task)obj;
-            if (this.TimeNew.CompareTo(t.TimeNew) < 0)
-                return -1;
-            else if (this.TimeNew.CompareTo(t.TimeNew) == 0)
-                return 0;
-            else
-                return 1;
-        }
+        //public int CompareTo(object obj)
+        //{
+        //    Task t = (Task)obj;
+        //    if (this.TimeNew.CompareTo(t.TimeNew) < 0)
+        //        return -1;
+        //    else if (this.TimeNew.CompareTo(t.TimeNew) == 0)
+        //        return 0;
+        //    else
+        //        return 1;
+        //}
 
-        public int CompareTo(Task obj, string done)
-        {
-            switch (done)
-            {
-                case "New":
-                    return this.CompareTo(obj);
-                case "Done":
-                    if (this.TimeDone.CompareTo(obj.TimeDone) < 0)
-                        return -1;
-                    else if (this.TimeDone.CompareTo(obj.TimeDone) == 0)
-                        return 0;
-                    else
-                        return 1;
-                default:
-                    throw new Exception("输入的参数错误");
-            }
-        }
+        //public int CompareTo(Task obj, string done)
+        //{
+        //    switch (done)
+        //    {
+        //        case "New":
+        //            return this.CompareTo(obj);
+        //        case "Done":
+        //            if (this.TimeDone.CompareTo(obj.TimeDone) < 0)
+        //                return -1;
+        //            else if (this.TimeDone.CompareTo(obj.TimeDone) == 0)
+        //                return 0;
+        //            else
+        //                return 1;
+        //        default:
+        //            throw new Exception("输入的参数错误");
+        //    }
+        //}
 
         // Task 使用哪一个字段进行排序
+                
         public enum SortField
         {
             TaskId,
@@ -104,58 +105,105 @@ namespace TaskList
             TimeNew,
             TimeDone
         }
-
-        // 用于排序的两个私有变量
-        private SortField sortField;
-        private SortDirection sortDirection;
-
-        // 初始化排序变量的构造方法
-        public Task(SortField sf, SortDirection sd)
+        
+        // 用于存储排序的字段和方法
+        public struct Sorter
         {
-            this.sortField = sf;
-            this.sortDirection = sd;
-        }
+            public SortField field;
+            public SortDirection direction;
 
-
-        // 实现 IComparer 接口
-        int IComparer<Task>.Compare(Task x, Task y)
-        {           
-            return this.Compare(x, y, this.sortField, this.sortDirection);
-        }
-
-        // 对单个属性按某种方式进行排序
-        int Compare(Task x, Task y, SortField field, SortDirection direction)
-        {
-            int result = 0;
-            switch (field)
+            public Sorter(SortField f, SortDirection dir)
             {
-                case SortField.TimeNew:
-                    if (direction == SortDirection.Ascending)
-                        return x.TimeNew.CompareTo(y.TimeNew);
-                    else
-                        return y.TimeNew.CompareTo(x.TimeNew);
+                this.field = f;
+                this.direction = dir;
+            }
+
+            public Sorter(SortField f)
+                : this(f, SortDirection.Ascending)
+            { 
+            }
+        }
+
+        // 嵌套类，实现 IComparer<Task> 接口
+        public class TaskComparer : IComparer<Task>
+        {
+            // 存储排序属性的集合
+            private List<Sorter> list;
+
+            public TaskComparer(List<Sorter> ls)
+            {
+                this.list = ls;
+            }
+
+            public TaskComparer(SortField sf, SortDirection sd)
+            {
+                list = new List<Sorter>();
+                list.Add(new Sorter(sf, sd));
+            }
+
+            public TaskComparer(SortField sf) : this(sf, SortDirection.Ascending) { }
+            public TaskComparer() : this(SortField.TaskId, SortDirection.Ascending) { }
+
+
+            //// 用于排序的两个私有变量
+            //private SortField sortField;
+            //private SortDirection sortDirection;
+
+            //// 初始化排序变量的构造方法
+            //public Task(SortField sf, SortDirection sd)
+            //{
+            //    this.sortField = sf;
+            //    this.sortDirection = sd;
+            //}
+
+
+            // 实现 IComparer 接口
+            int IComparer<Task>.Compare(Task x, Task y)
+            {
+                int result = 0;
+                foreach (Sorter item in list)
+                {
+                    result = Compare(x, y, item.field, item.direction);
+                    if (result != 0)        // 一旦 result 不为0 ，则已经区分出位置的大小，跳出循环
+                        break;
+                }
+                return result;
+            }
+
+            // 对单个属性按某种方式进行排序
+            int Compare(Task x, Task y, SortField field, SortDirection direction)
+            {
+                int result = 0;
+                switch (field)
+                {
+                    case SortField.TimeNew:
+                        if (direction == SortDirection.Ascending)
+                            return x.TimeNew.CompareTo(y.TimeNew);
+                        else
+                            return y.TimeNew.CompareTo(x.TimeNew);
                     //break;
-                case SortField.TimeDone:
-                    if (direction == SortDirection.Ascending)
-                        return x.TimeDone.CompareTo(y.TimeDone);
-                    else
-                        return y.TimeDone.CompareTo(x.TimeDone);
+                    case SortField.TimeDone:
+                        if (direction == SortDirection.Ascending)
+                            return x.TimeDone.CompareTo(y.TimeDone);
+                        else
+                            return y.TimeDone.CompareTo(x.TimeDone);
                     //break;
-                case SortField.TaskId:
-                    if (direction == SortDirection.Ascending)
-                        return x.TId.CompareTo(y.TId);
-                    else 
-                        return y.TId.CompareTo(x.TId);
+                    case SortField.TaskId:
+                        if (direction == SortDirection.Ascending)
+                            return x.TId.CompareTo(y.TId);
+                        else
+                            return y.TId.CompareTo(x.TId);
                     //break;
-                case SortField.TaskContent:
-                    if (direction == SortDirection.Ascending)
-                        return x.Content.CompareTo(y.Content);
-                    else
-                        return y.Content.CompareTo(x.Content);
+                    case SortField.TaskContent:
+                        if (direction == SortDirection.Ascending)
+                            return x.Content.CompareTo(y.Content);
+                        else
+                            return y.Content.CompareTo(x.Content);
                     //break;
 
+                }
+                return result;
             }
-            return result;
         }
     }
 }
