@@ -54,6 +54,7 @@ namespace TaskList
             }       
         }
 
+        // 查询 XML 文档中任务的总数
         private int getTaskAmount()
         {
             nav = xDoc.CreateNavigator();       // 创建文档浏览器
