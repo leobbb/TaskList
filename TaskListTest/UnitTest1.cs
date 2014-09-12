@@ -69,5 +69,19 @@ namespace TaskListTest
             // Assert 
             Assert.AreEqual(expected, actual);
         }
+
+        [TestMethod]
+        public void TestValidXml()
+        {
+            try
+            {
+
+                privateObject.Invoke("ValidXml", "Data/TaskList.xml");
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+        }
     }
 }

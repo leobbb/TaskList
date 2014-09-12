@@ -39,6 +39,11 @@ namespace TaskList
 
                 //lblShow.Text = "文件已经创建";
 
+                // 加载之前，先验证 XML 文档的有效性
+                // 如果存在错误，则直接返回 false
+                if (!ValidXml(path))
+                    throw new Exception("XML 文件未通过 DTD 验证");
+                
                 // 把 XML 文档加载到内存
                 xDoc.Load(path);
 
@@ -46,11 +51,12 @@ namespace TaskList
                 count = getTaskAmount();
 
                 // 初始化列表内容
-                btnDoing_Click(sender, e);
+                refreshList("doing");
             }
             catch (Exception ex)
-            {
+            {                
                 MessageBox.Show(ex.Message + "\n 请重新打开" ,"程序加载时出现错误");
+                Application.Exit();
             }       
         }
 
@@ -81,7 +87,7 @@ namespace TaskList
                             "<!ELEMENT TimeNew (#PCDATA)>" +
                             "<!ELEMENT TimeDone (#PCDATA)>" +
                             "<!ATTLIST TaskList count CDATA \"0\">" +
-                            "<!ATTLIST Task id ID #REQUIRED>";
+                            "<!ATTLIST Task id CDATA #REQUIRED>";
             XmlDocumentType docType;
             docType = xDoc.CreateDocumentType("TaskList", null, null, strdoc);
             xDoc.AppendChild(docType);
@@ -125,10 +131,12 @@ namespace TaskList
 
             if (addXmlElement(task))
             {
-                btnDoing_Click(sender, e);
-                lblShow.Text = "任务添加成功";
+                refreshList("doing");
+                lblShow.Text = "任务添加成功，请刷新列表";
                 txtContent.Text = "";
                 txtContent.Focus();
+                btnDoing.BackColor = SystemColors.ActiveCaption;
+                btnDone.BackColor = SystemColors.Control;
             }
             else
             {
@@ -209,7 +217,14 @@ namespace TaskList
                     {
                         lblShow.Text += "  请手动检查数据文件";
                     }
-                    break;               
+                    break;       
+                case 2:   // 出现致命错误，先将内存中的数据保存到 “failure.txt”中
+                    System.IO.StreamWriter sw = new System.IO.StreamWriter("failure.txt", true);
+                    sw.WriteLine(DateTime.Now);
+                    sw.Write(xDoc.OuterXml);
+                    sw.WriteLine();
+                    sw.Close();
+                    break;
             }   
         }
 
@@ -346,7 +361,7 @@ namespace TaskList
                 if (task != null)
                 {
                     // 如果btnDoing按键被激活，则双击事件完成“把任务标记为已完成”的任务。
-                    if (btnDoing.BackColor == SystemColors.ActiveCaption)
+                    if (btnDone.BackColor != SystemColors.ActiveCaption)
                     {
                         if(updateTask(task.TId,"done"))
                         {
@@ -372,6 +387,7 @@ namespace TaskList
             }
             catch (Exception ex)
             {
+                errorHandling(2); // 存在错误，进行错误处理
                 MessageBox.Show(ex.Message, "更新失败\n请检查数据文件", MessageBoxButtons.OK);
             }
         }
@@ -400,33 +416,78 @@ namespace TaskList
                 nav.SetValue(DateTime.Now.ToString());
             }
 
+            // XML 文档信息改变，保存文件到硬盘
+            xDoc.Save(path);
+
             return true;
         }
 
         private void xmlForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            //try
+            //{
+            //    // 窗体关闭之前，保存文件。
+            //    xDoc.Save(path);
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show(ex.Message, "保存文件出错");
+                
+            //    DialogResult dres = MessageBox.Show("是否继续关闭窗口？\n并将数据保存到“failure.txt”中？", "即将关闭", MessageBoxButtons.OKCancel);
+            //    if (dres == System.Windows.Forms.DialogResult.OK)
+            //    {
+            //        System.IO.StreamWriter sw = new System.IO.StreamWriter("failure.txt", true);
+            //        sw.WriteLine(DateTime.Now);
+            //        sw.Write(xDoc.OuterXml);
+            //        sw.WriteLine();
+            //        sw.Close();
+            //    }
+            //    else
+            //    {
+            //        lblShow.Text = "不能正常关闭程序，请检查数据文件。";
+            //        e.Cancel = true;
+            //    }
+            //}
+        }
+
+        // 根据 DTD 验证 XML 文件的有效性
+        private bool ValidXml(string p)
+        {
+            // p 为文件路径信息
+            // 使用 XmlNode 创建 XmlNodeReader 对象， XmlNodeReader 继承与 XmlReader
+            XmlReader textReader = new XmlTextReader(p) ;
+
+            // 设置 XmlReaderSettings 验证对象的内容
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.DTD;
+            settings.DtdProcessing = DtdProcessing.Parse;
+            settings.ValidationEventHandler += new System.Xml.Schema.ValidationEventHandler(ValidationCallBack);
+
+            // 再使用 XmlNodeReader 创建 XmlReader 对象进行 DTD 验证
+            XmlReader reader = XmlReader.Create(textReader, settings);
+
             try
             {
-                // 窗体关闭之前，保存文件。
-                xDoc.Save(path);
+                // 验证 XML 文件
+                while (reader.Read()) ;
+                return true;
             }
-            catch (Exception ex)
+            catch (Exception )
             {
-                MessageBox.Show(ex.Message, "保存文件出错");
-                
-                DialogResult dres = MessageBox.Show("是否继续关闭窗口？\n并将数据保存到“failure.txt”中？", "即将关闭", MessageBoxButtons.OKCancel);
-                if (dres == System.Windows.Forms.DialogResult.OK)
-                {
-                    System.IO.StreamWriter sw = new System.IO.StreamWriter("failure.txt", true);
-                    sw.Write(xDoc.OuterXml);
-                    sw.Close();
-                }
-                else
-                {
-                    lblShow.Text = "不能正常关闭程序，请检查数据文件。";
-                    e.Cancel = true;
-                }
+                    return false;
             }
+            finally
+            {
+                reader.Close();
+            }
+        }
+
+        // 处理 XmlReaderSettings.ValidationEventHandler 事件的方法
+        private void ValidationCallBack(object sender, System.Xml.Schema.ValidationEventArgs e)
+        {
+            // 如果 XML 文件中存在错误，才产生异常
+            if (e.Severity == System.Xml.Schema.XmlSeverityType.Error)
+                throw new Exception("Error");
         }
 
     }
