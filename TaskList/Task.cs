@@ -14,7 +14,7 @@ namespace TaskList
         Descending = 1
     }
 
-    class Task 
+    public class Task 
     {
         private int _tId;           // 任务的编号
         private string _content;    // 任务的内容
@@ -46,7 +46,7 @@ namespace TaskList
         }
 
         public Task(int id, string cont)
-            : this(id, cont, string.Empty, new DateTime(), new DateTime())
+            : this(id, cont, "doing", DateTime.Now, DateTime.Now)
         {
             this._tId = id;
             this._content = cont;

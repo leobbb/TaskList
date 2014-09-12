@@ -41,10 +41,11 @@ namespace TaskList
 
                 // 加载之前，先验证 XML 文档的有效性
                 // 如果存在错误，则直接返回 false
-                if (!ValidXml(path))
-                    throw new Exception("XML 文件未通过 DTD 验证");
+                if(!ValidXml(path))
+                    throw new Exception("DTD ERROR");
                 
                 // 把 XML 文档加载到内存
+                xDoc = new XmlDocument();
                 xDoc.Load(path);
 
                 // 查询 XML 文档中任务的总数
@@ -54,9 +55,18 @@ namespace TaskList
                 refreshList("doing");
             }
             catch (Exception ex)
-            {                
-                MessageBox.Show(ex.Message + "\n 请重新打开" ,"程序加载时出现错误");
-                errorHandling(1);
+            {
+                if (ex.Message == "DTD ERROR")
+                {
+                    //MessageBox.Show("XML 文档未通过 DTD 验证" + "\n 请重新打开", "程序加载时出现错误");
+                    // 进行错误处理
+                    errorHandling(3);
+                }
+                else
+                {
+                    MessageBox.Show(ex.Message, "程序加载时出现错误");
+                    errorHandling(1);
+                }
             }       
         }
 
@@ -132,7 +142,7 @@ namespace TaskList
             if (addXmlElement(task))
             {
                 refreshList("doing");
-                lblShow.Text = "任务添加成功，请刷新列表";
+                lblShow.Text = "任务添加成功";
                 txtContent.Text = "";
                 txtContent.Focus();
                 btnDoing.BackColor = SystemColors.ActiveCaption;
@@ -210,15 +220,15 @@ namespace TaskList
             switch (e)
             {
                 case 1:     // 添加新节点出错，或者刷新出错        
-                    dres = MessageBox.Show("数据文件无法使用，可能存在错误。\n是否删除所有数据，建立新文件？", "数据文件损坏", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
-                    if (dres == System.Windows.Forms.DialogResult.OK)
+                    dres = MessageBox.Show("数据文件无法使用，可能存在错误。\n是否重试？", "文件出错", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    if (dres == System.Windows.Forms.DialogResult.Cancel)
                     {
-                        createNewXmlFile();
-                        lblShow.Text += "  数据文件已重新建立";
+                        MessageBox.Show("程序将要关闭，请手动检查数据文件。", "文件出错");
+                        Application.Exit();
                     }
                     else
                     {
-                        lblShow.Text += "  请手动检查数据文件";
+                        lblShow.Text += "@@程序存在异常@@";
                     }
                     break;       
                 case 2:   // 出现致命错误，先将内存中的数据保存到 “failure.txt”中
@@ -228,6 +238,33 @@ namespace TaskList
                     sw.WriteLine();
                     sw.Close();
                     break;
+                case 3:
+                    dres = MessageBox.Show("XML 文档未通过 DTD 验证，存在错误" + "\n是否建立新文件？ \n旧文件将被重命名", "加载出错", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+                    if (dres == System.Windows.Forms.DialogResult.OK)
+                    {
+                        try
+                        {
+                            string newName = "Data/TaskList-" + DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss") + ".xml";
+                            System.IO.File.Move(path, newName);
+                            createNewXmlFile();
+                            xDoc = new XmlDocument();
+                            xDoc.Load(path);
+                            lblShow.Text += "  数据文件已重新建立";
+                        }
+                        catch(Exception ex)
+                        {
+                            MessageBox.Show(ex.Message + "\n新文件建立失败 \n程序将要关闭，请手动将数据文件删除。", "失败");
+                            Application.Exit();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("程序将要关闭，请手动检查数据文件。", "加载出错");
+                        Application.Exit();
+                    }
+                    break;       
+
+
             }   
         }
 
@@ -237,7 +274,7 @@ namespace TaskList
             btnDoing.BackColor = SystemColors.ActiveCaption;
             btnDone.BackColor = SystemColors.Control;
             if (refreshList("doing"))
-                lblShow.Text = "正在进行中的任务已刷新";
+                lblShow.Text = "正在进行中的任务列表--已刷新";
             else
             {
                 lblShow.Text = "刷新失败";
@@ -351,7 +388,7 @@ namespace TaskList
             btnDone.BackColor = SystemColors.ActiveCaption;
             btnDoing.BackColor = SystemColors.Control;
             if (refreshList("done"))
-                lblShow.Text = "完成的任务已刷新";
+                lblShow.Text = "完成的任务列表--已刷新";
             else
             {
                 lblShow.Text = "刷新失败";
@@ -469,7 +506,7 @@ namespace TaskList
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.ValidationType = ValidationType.DTD;
             settings.DtdProcessing = DtdProcessing.Parse;
-            settings.ValidationEventHandler += new System.Xml.Schema.ValidationEventHandler(ValidationCallBack);
+            //settings.ValidationEventHandler += new System.Xml.Schema.ValidationEventHandler(ValidationCallBack);
 
             // 再使用 XmlNodeReader 创建 XmlReader 对象进行 DTD 验证
             XmlReader reader = XmlReader.Create(textReader, settings);
@@ -487,6 +524,8 @@ namespace TaskList
             finally
             {
                 reader.Close();
+                reader.Dispose();
+                textReader.Dispose();
             }
         }
 

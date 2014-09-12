@@ -9,16 +9,22 @@ namespace TaskListTest
     {
         // 用于访问测试对象的私有成员的类对象
         private PrivateObject privateObject;
-        
+        private PrivateType privateType;
+
+
         [TestInitialize]
         public void TestInitialize()
         {
             // 使用测试对象的类型，实例化
             privateObject = new PrivateObject(typeof(xmlForm));
+            privateType = new PrivateType(typeof(xmlForm));
 
-            //System.Xml.XmlDocument xDoc = new System.Xml.XmlDocument();
-            //xDoc.Load("Data/TaskList.xml");
+            // 每个测试方法开始之前，对私有字段 xDoc 赋值
+            System.Xml.XmlDocument xDoc = new System.Xml.XmlDocument();
+            xDoc.Load("Data/TaskList.xml");
+            privateObject.SetField("xDoc", xDoc);
 
+            
             //privateObject.Invoke("xmlForm_Load", new System.Object(), new System.EventArgs());
         }
 
@@ -46,8 +52,8 @@ namespace TaskListTest
             string str = "Data/TaskList.xml";
             if (System.IO.File.Exists(str))
                 System.IO.File.Delete(str);
-            PrivateType priType = new PrivateType(typeof(xmlForm));
-            priType.SetStaticField("path", str);
+            
+            privateType.SetStaticField("path", str);
             
             // Act
             privateObject.Invoke("createNewXmlFile");
@@ -61,22 +67,32 @@ namespace TaskListTest
         public void TestStaticFieldCount()
         {
             // Arrange 
-            int expected = 2;
-            PrivateType  privateType = new PrivateType (typeof(xmlForm));
+            // 只要能获取到静态字段 count 的值 就可以
+
             // Act 
             int actual = (int)privateType.GetStaticField("count");
 
             // Assert 
-            Assert.AreEqual(expected, actual);
+            Assert.IsTrue(actual > -1);
         }
 
         [TestMethod]
         public void TestValidXml()
         {            
 
-            bool autual = (bool)privateObject.Invoke("ValidXml", "Data/sdf");
+            bool autual = (bool)privateObject.Invoke("ValidXml", "Data/TaskList.xml");
 
             Assert.IsTrue(autual);
+        }
+
+        [TestMethod]
+        public void TestAddTask()
+        {
+            TaskList.Task task = new Task(88, "测试测试");
+
+            bool actual = (bool)privateObject.Invoke("addXmlElement", task);
+
+            Assert.IsTrue(actual); 
         }
     }
 }
