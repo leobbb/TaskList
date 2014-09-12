@@ -56,7 +56,6 @@
             this.lblShow.Name = "lblShow";
             this.lblShow.Size = new System.Drawing.Size(309, 18);
             this.lblShow.TabIndex = 15;
-            this.lblShow.Text = "show";
             this.lblShow.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnDoing

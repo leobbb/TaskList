@@ -72,16 +72,11 @@ namespace TaskListTest
 
         [TestMethod]
         public void TestValidXml()
-        {
-            try
-            {
+        {            
 
-                privateObject.Invoke("ValidXml", "Data/TaskList.xml");
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail(ex.Message);
-            }
+            bool autual = (bool)privateObject.Invoke("ValidXml", "Data/sdf");
+
+            Assert.IsTrue(autual);
         }
     }
 }

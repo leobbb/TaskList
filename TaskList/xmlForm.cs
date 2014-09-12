@@ -15,7 +15,7 @@ namespace TaskList
         public xmlForm()
         {
             InitializeComponent();
-            xDoc = new XmlDocument();
+            //xDoc = new XmlDocument();
         }
 
         XmlDocument xDoc;
@@ -56,7 +56,7 @@ namespace TaskList
             catch (Exception ex)
             {                
                 MessageBox.Show(ex.Message + "\n 请重新打开" ,"程序加载时出现错误");
-                Application.Exit();
+                errorHandling(1);
             }       
         }
 
@@ -150,6 +150,9 @@ namespace TaskList
         // 向 XML 文档添加一个新的任务
         private bool addXmlElement(Task task)
         {
+            if (xDoc == null)
+                return false;
+
             try
             {
                 //xDoc.Load(path);      // 加载xml文件
@@ -247,6 +250,9 @@ namespace TaskList
         // 刷新列表，根据 p 的值选择显示 doing 的任务，还是 done 的任务。
         private bool refreshList(string status)
         {
+            if (xDoc == null)
+                return false;
+
             cklShow.Items.Clear();
             try
             {
@@ -312,9 +318,11 @@ namespace TaskList
                 {
                     case "done":        // 完成的任务的顺序是 最后完成的排在前边( 按完成时间倒序）
                         tList.Sort(new Task.TaskComparer(Task.SortField.TimeDone, SortDirection.Descending));
+                        lblAmount.Text = "已完成的任务共 " + tList.Count + " 个";
                         break;
                     case "doing":       // 进行中的任务的顺序是 最后添加的排在后边（按开始时间顺序）
                         tList.Sort(new Task.TaskComparer(Task.SortField.TimeNew, SortDirection.Ascending));
+                        lblAmount.Text = "已完成的任务共 " + tList.Count + " 个";
                         break;
                 }
                
