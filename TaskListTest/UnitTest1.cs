@@ -16,10 +16,10 @@ namespace TaskListTest
             // 使用测试对象的类型，实例化
             privateObject = new PrivateObject(typeof(xmlForm));
 
-            System.Xml.XmlDocument xDoc = new System.Xml.XmlDocument();
-            xDoc.Load("Data/TaskList.xml");
+            //System.Xml.XmlDocument xDoc = new System.Xml.XmlDocument();
+            //xDoc.Load("Data/TaskList.xml");
 
-            privateObject.Invoke("xmlForm_Load", new System.Object(), new System.EventArgs());
+            //privateObject.Invoke("xmlForm_Load", new System.Object(), new System.EventArgs());
         }
 
         [TestMethod]
@@ -37,6 +37,24 @@ namespace TaskListTest
             // Assert 
             Assert.IsTrue(actual1, "done's wrong");
             Assert.IsTrue(actual2, "doing's wrong");
+        }
+
+        [TestMethod]
+        public void TestCreateXml()
+        {
+            // Arrange
+            string str = "Data/TaskList.xml";
+            if (System.IO.File.Exists(str))
+                System.IO.File.Delete(str);
+            PrivateType priType = new PrivateType(typeof(xmlForm));
+            priType.SetStaticField("path", str);
+            
+            // Act
+            privateObject.Invoke("createNewXmlFile");
+
+            // Assert 
+            if (!System.IO.File.Exists(str))
+                Assert.Fail("文件没有保存成功");
         }
 
         [TestMethod]

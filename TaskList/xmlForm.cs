@@ -50,7 +50,7 @@ namespace TaskList
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message,"程序加载时出现错误\n请重新打开");
+                MessageBox.Show(ex.Message + "\n 请重新打开" ,"程序加载时出现错误");
             }       
         }
 
@@ -70,8 +70,21 @@ namespace TaskList
                 System.IO.Directory.CreateDirectory("./Data");
 
             xDoc = new XmlDocument();
-            XmlDeclaration declare = xDoc.CreateXmlDeclaration("1.0", "utf-8", "yes");
+            XmlDeclaration declare = xDoc.CreateXmlDeclaration("1.0", "utf-8",null);
             xDoc.AppendChild(declare);
+            
+            // 添加文档的 DTD （文档类型定义）
+            string strdoc = "<!ELEMENT TaskList (Task*)>" +
+                            "<!ELEMENT Task (TaskContent,TaskStatus,TimeNew,TimeDone)>" +
+                            "<!ELEMENT TaskContent (#PCDATA)>" +
+                            "<!ELEMENT TaskStatus (#PCDATA)>" +
+                            "<!ELEMENT TimeNew (#PCDATA)>" +
+                            "<!ELEMENT TimeDone (#PCDATA)>" +
+                            "<!ATTLIST TaskList count CDATA \"0\">" +
+                            "<!ATTLIST Task id ID #REQUIRED>";
+            XmlDocumentType docType;
+            docType = xDoc.CreateDocumentType("TaskList", null, null, strdoc);
+            xDoc.AppendChild(docType);
 
             root = xDoc.CreateElement("TaskList");      // 创建根节点 TaskList
 
