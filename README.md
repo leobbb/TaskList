@@ -12,8 +12,8 @@
 
 > 依赖： .NET 4.5， XML 1.0.
 
-## 源码有三个分支(branches)：master.using-sql, using-XML.##
-* master: 初始的分支，内容等于using-XML分支。
+## 源码主要的三个分支(branches)：master.using-sql, using-XML.##
+* master: 初始的分支，稳定内容。
 * using-sql: 使用SQL Server LocalDb 2012数据库存储数据，实现上述功能。
 * using-XML: 使用XML 文档存储数据，实现上述功能。
 
@@ -27,3 +27,9 @@
 * 正在进行中的任务显示的顺序为，后添加的任务在下边
 * 已完成的任务显示的顺序为，后完成的任务在上边
 
+## fixed bugs
+
+### 分支 fix-order-bugs
+* 在Task类中添加实现了 IComparer 接口的内嵌类 TaskComparer, 修复排序问题。
+* 添加文档类型定义 DTD，实现检查 XML 文档的功能。
+* 优化处理异常的逻辑。
